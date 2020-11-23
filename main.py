@@ -8,12 +8,7 @@ from time import mktime
 from flask import Flask
 from flask import request, Response
 
-URL="https://mamot.fr/@testrjo.rss"
-APP_ID="370919417317291"
-APP_SECRET="22add9d6d0002f23800c5a7b7536de3c"
-PAGE_ID="112264450137701"
 
-feed = feedparser.parse(URL)
 
 TYPE_TEXT = "text"
 TYPE_LINK = "link"
@@ -23,8 +18,10 @@ TYPE_IMAGE = "image"
 html2text = HTML2Text()
 html2text.ignore_links = True
 
-def transform_rss(filter=None) :
+def transform_rss(url, filter=None) :
     items= []
+    feed = feedparser.parse(url)
+
     for entry in feed['entries'] :
 
         type = TYPE_TEXT
@@ -85,8 +82,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def entry_point():
-    res = transform_rss(request.args.get("filter"))
+    filter = request.args.get("filter")
+    url = request.args.get("url")
+    res = transform_rss(url, filter)
     return Response(res.rss(), mimetype='text/xml')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True, threaded=True)
