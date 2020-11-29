@@ -36,6 +36,11 @@ def transform_rss(url, filter=None) :
                     type = TYPE_IMAGE
                     out_entry_link = link.href
                     break
+                if 'video' in link.type :
+                    # VIDEO upload is not supported by IFTTT : let's share link to video
+                    type = TYPE_LINK
+                    out_entry_link = link.href
+                    break
 
         if summary.type == 'text/html' :
 
@@ -54,6 +59,8 @@ def transform_rss(url, filter=None) :
 
 
         summary_txt += "\n[transféré depuis %s]" % entry_link
+        summary_txt = summary_txt.strip()
+
         summary_html = "<br/>".join(summary_txt.splitlines())
 
         if filter is not None and type != filter :
