@@ -8,8 +8,6 @@ from time import mktime
 from flask import Flask
 from flask import request, Response
 
-
-
 TYPE_TEXT = "text"
 TYPE_LINK = "link"
 TYPE_IMAGE = "image"
@@ -45,23 +43,22 @@ def transform_rss(url, filter=None) :
         if summary.type == 'text/html' :
 
             html = BeautifulSoup(summary.value, 'html.parser')
-            summary_txt = html2text.handle(summary.value)
 
             for link in html.findAll('a'):
-                if not (link.get("class") and "mention" in link.get("class")) :
+                if not (link.get("class") and "mention" in link.get("class")) and type == TYPE_TEXT:
                     type = TYPE_LINK
                     out_entry_link = link.get('href')
+                    link.extract()
                     break
 
+            summary_html = html.prettify()
+
         else :
-            summary_txt = summary.value
+            summary_txt = summary.value.splitlines()
+            summary_html = "<br/>".join(summary_txt.splitlines())
 
-
-
-        summary_txt += "\n[transféré depuis %s]" % entry_link
-        summary_txt = summary_txt.strip()
-
-        summary_html = "<br/>".join(summary_txt.splitlines())
+        summary_html += "<br/>\n[transféré depuis %s]" % entry_link
+        summary_html = summary_html.strip()
 
         if filter is not None and type != filter :
             continue
